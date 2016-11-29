@@ -1,23 +1,27 @@
 package com.example.tobias.contextawareapp;
 
+import android.app.Activity;
+import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
 import android.media.MediaScannerConnection;
+import android.os.Looper;
 import android.os.PowerManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
+import android.widget.Toast;
 
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.concurrent.LinkedBlockingDeque;
 
@@ -45,7 +49,12 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Button btn = (Button) findViewById(R.id.button);
+        Button writeDataToFileBtn = (Button) findViewById(R.id.write_data_to_file_btn);
+        Button startLoggingBtn = (Button) findViewById(R.id.start_loggin_btn);
+        Button pauseLoggingBtn = (Button) findViewById(R.id.pause_logging_btn);
+        Button clearDataBtn = (Button) findViewById(R.id.clear_data_btn);
+
+        final EditText fileNameTxt = (EditText) findViewById(R.id.file_name_txt);
 
         PowerManager powerManager = (PowerManager) getSystemService(POWER_SERVICE);
         wakeLock = powerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
@@ -54,37 +63,76 @@ public class MainActivity extends AppCompatActivity {
 
         final File fileDir = this.getExternalFilesDir(null);
 
-        btn.setOnClickListener(new View.OnClickListener() {
+        writeDataToFileBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                String fileName = "Log.csv";
+                if(!fileNameTxt.getText().toString().matches(""))
+                {
+                    String fileName = fileNameTxt.getText().toString() + ".csv";
 
-                try {
-                    File file = new File(fileDir, fileName);
-                    if (!file.exists()){
-                        file.createNewFile();
+                    try {
+                        File file = new File(fileDir, fileName);
+                        if (!file.exists()) {
+                            file.createNewFile();
+                        }
+
+                        BufferedWriter writer = new BufferedWriter(new FileWriter(file, false));
+
+                        for (Double[] result : windowsResults) {
+                            String log = result[0] + ", " + result[1] + ", " + result[2];
+                            writer.write(log);
+                            writer.write("\r\n");
+                        }
+
+                        writer.close();
+                        MediaScannerConnection.scanFile(getApplicationContext(),
+                                new String[]{file.toString()},
+                                null,
+                                null);
+                    } catch (IOException e) {
+                        e.printStackTrace();
                     }
 
-                    BufferedWriter writer = new BufferedWriter(new FileWriter(file, false));
-
-                    for(Double[] result : windowsResults)
-                    {
-                        String log = result[0] + ", " + result[1] + ", " + result[2];
-                        writer.write(log);
-                        writer.write("\r\n");
-                    }
-
-                    writer.close();
-                    MediaScannerConnection.scanFile(getApplicationContext(),
-                            new String[] { file.toString() },
-                            null,
-                            null);
-                } catch (IOException e) {
-                    e.printStackTrace();
+                    Toast.makeText(getApplicationContext(), windowsResults.size() + " records was written to " + fileName, Toast.LENGTH_SHORT).show();
+                }
+                else
+                {
+                    Toast.makeText(getApplicationContext(), "File name missing.", Toast.LENGTH_SHORT).show();
                 }
             }
         });
 
+        startLoggingBtn.setOnClickListener(new View.OnClickListener() {
+              @Override
+              public void onClick(View view) {
+                  try {
+                      sensorManager.unregisterListener(eventListener);
+                  }catch (NullPointerException e) {} //ignore
+
+                  sensorManager.registerListener(eventListener, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+
+                  Toast.makeText(getApplicationContext(), "Logging was started.", Toast.LENGTH_SHORT).show();
+              }
+          });
+
+        pauseLoggingBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                try {
+                    sensorManager.unregisterListener(eventListener);
+                }catch (NullPointerException e) {} //ignore
+                Toast.makeText(getApplicationContext(), "Logging was paused.", Toast.LENGTH_SHORT).show();
+            }
+        });
+
+        clearDataBtn.setOnClickListener(new View.OnClickListener() {
+              @Override
+              public void onClick(View view) {
+                  activityLog.clear();
+                  windowsResults.clear();
+                  Toast.makeText(getApplicationContext(), "Array was cleared.", Toast.LENGTH_SHORT).show();
+              }
+          });
         sensorManager = (SensorManager) getSystemService(SENSOR_SERVICE);
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
 
@@ -113,15 +161,19 @@ public class MainActivity extends AppCompatActivity {
                     if(samplesSinceLastWindow > windowSampleSize / 2)
                     {
                         samplesSinceLastWindow = 0;
-
                         new Thread(new Runnable() {
                             public void run(){
+                                Looper.prepare();
 
+                                showToast();
                                 startWindow();
-
                             }
                         }).start();
                     }
+                }
+                else if(activityLog.size() < 2)
+                {
+                    Toast.makeText(getApplicationContext(), "Filling array with data...", Toast.LENGTH_LONG).show();
                 }
             }
 
@@ -130,6 +182,15 @@ public class MainActivity extends AppCompatActivity {
 
             }
         };
+    }
+
+    private void showToast() {
+        this.runOnUiThread(new Runnable() {
+            public void run() {
+                Toast.makeText(getApplicationContext(), "Start analysing data of sliding window.", Toast.LENGTH_LONG).show();
+
+            }
+        });
     }
 
     private void startWindow()
@@ -156,7 +217,7 @@ public class MainActivity extends AppCompatActivity {
             float y = log[1];
             float z = log[2];
 
-            //Log.d(DEBUG_TAG, x + " : " + y + " : " + z);
+            Log.d(DEBUG_TAG, x + " : " + y + " : " + z);
 
             norm = calcEuclideanNorm(x, y, z);
 
@@ -187,6 +248,11 @@ public class MainActivity extends AppCompatActivity {
             standardDeviation
         });
 
+        this.runOnUiThread(new Runnable() {
+            public void run() {
+                Toast.makeText(getApplicationContext(), "Data from sliding window was logged.", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     private double calcEuclideanNorm(float x, float y, float z)
@@ -211,15 +277,12 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        sensorManager.registerListener(eventListener, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
     }
 
     @Override
     public void onStop() {
         super.onStop();
-        try {
-            sensorManager.unregisterListener(eventListener);
-        }catch (NullPointerException e) {} //ignore
+
 
         wakeLock.release();
     }
