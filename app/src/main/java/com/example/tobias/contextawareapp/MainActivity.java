@@ -283,8 +283,10 @@ public class MainActivity extends AppCompatActivity {
     public void onStop() {
         super.onStop();
 
+        try {
+            wakeLock.release();
+        }catch (NullPointerException e) {} //ignore
 
-        wakeLock.release();
     }
 
     private void logData(float x, float y, float z)
