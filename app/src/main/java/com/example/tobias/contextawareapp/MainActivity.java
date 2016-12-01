@@ -286,7 +286,6 @@ public class MainActivity extends AppCompatActivity {
         try {
             wakeLock.release();
         }catch (NullPointerException e) {} //ignore
-
     }
 
     private void logData(float x, float y, float z)
