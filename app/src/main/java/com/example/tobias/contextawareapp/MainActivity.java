@@ -1,12 +1,9 @@
 package com.example.tobias.contextawareapp;
 
-import android.app.Activity;
-import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.media.MediaScannerConnection;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.support.v7.app.AppCompatActivity;
@@ -17,13 +14,16 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.LinkedBlockingDeque;
+
+import weka.classifiers.trees.J48;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -66,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
         writeDataToFileBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if(!fileNameTxt.getText().toString().matches(""))
+                /*if(!fileNameTxt.getText().toString().matches(""))
                 {
                     String fileName = fileNameTxt.getText().toString() + ".csv";
 
@@ -98,6 +98,20 @@ public class MainActivity extends AppCompatActivity {
                 else
                 {
                     Toast.makeText(getApplicationContext(), "File name missing.", Toast.LENGTH_SHORT).show();
+                }*/
+
+                J48 cls;
+
+                try{
+                    ObjectInputStream ois = new ObjectInputStream(
+                            getAssets().open("J48_walking_cycling_NEW.model"));
+                    cls = (J48) ois.readObject();
+                    ois.close();
+                    cls.getRevision();
+                    Log.d(DEBUG_TAG, cls.getRevision());
+                }
+                catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
         });

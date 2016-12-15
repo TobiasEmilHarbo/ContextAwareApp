@@ -26,5 +26,5 @@ dependencies {
     })
     compile 'com.android.support:appcompat-v7:25.0.1'
     testCompile 'junit:junit:4.12'
-    compile files('libs/weka.jar')
+    compile 'nz.ac.waikato.cms.weka:weka-stable:3.8.0'
 }
