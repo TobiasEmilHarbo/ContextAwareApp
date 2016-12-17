@@ -88,6 +88,7 @@ public class ActivityWidget {
 
             }
         };
+
     }
 
     private Context getContext(){
@@ -96,8 +97,6 @@ public class ActivityWidget {
 
     private void logData(float x, float y, float z)
     {
-        Long timeStamp = System.currentTimeMillis();
-
         Float[] log = new Float[]{x, y, z};
 
         while(!activityLog.offerFirst(log))
@@ -179,5 +178,25 @@ public class ActivityWidget {
         double variance = deviation / windowSampleSize;
 
         return Math.sqrt(variance);
+    }
+
+    public void startDatagathering() {
+        try {
+            sensorManager.unregisterListener(eventListener);
+        }catch (NullPointerException e) {} //ignore
+
+        sensorManager.registerListener(eventListener, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
+    }
+
+    public void pauseDatagathering() {
+        try {
+            sensorManager.unregisterListener(eventListener);
+        }catch (NullPointerException e) {} //ignore
+    }
+
+    public void clearData() {
+        activityLog.clear();
+        windowsResults.clear();
+        Toast.makeText(getContext(), "Array was cleared.", Toast.LENGTH_SHORT).show();
     }
 }
