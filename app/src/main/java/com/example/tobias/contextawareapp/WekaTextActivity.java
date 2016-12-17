@@ -1,15 +1,16 @@
 package com.example.tobias.contextawareapp;
 
 import android.os.Bundle;
+import android.os.Environment;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
 import java.io.ObjectInputStream;
 
 import weka.classifiers.Classifier;
-import weka.classifiers.evaluation.Evaluation;
-import weka.classifiers.trees.J48;
 import weka.core.Attribute;
 import weka.core.DenseInstance;
 import weka.core.FastVector;
@@ -27,67 +28,56 @@ public class WekaTextActivity extends AppCompatActivity {
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_weka_test);
-
-
     }
 
     @Override
     protected void onStart() {
         super.onStart();
 
-        try{
-            // Declare two numeric attributes
-            Attribute maxAttribute = new Attribute("max");
-            Attribute minAttribute = new Attribute("min");
+        try {
+
+            Attribute minMagAttr = new Attribute("min_mag");
+            Attribute maxMagAttr = new Attribute("max_mag");
+
+            // Declare the class attribute along with its values
+            FastVector fvClassVal = new FastVector(2);
+
+            fvClassVal.addElement("cycling");
+            fvClassVal.addElement("walk");
+            Attribute ClassAttribute = new Attribute("qt", fvClassVal);
 
             // Declare the feature vector
-            FastVector fvWekaAttributes = new FastVector(4);
-            fvWekaAttributes.addElement(maxAttribute);
-            fvWekaAttributes.addElement(minAttribute);
+            FastVector attributes = new FastVector(7);
 
-            Instances dataset = new Instances("Rel", fvWekaAttributes, 10);
+            attributes.addElement(minMagAttr);
+            attributes.addElement(maxMagAttr);
+            attributes.addElement(ClassAttribute);
 
-            dataset.setClassIndex(1);
+            // Create empty instance
+            Instances newDataEntry = new Instances("Rel", attributes, 7);
+            newDataEntry.setClassIndex(newDataEntry.numAttributes() - 1);
 
-            // Create the instance
-            Instance instance = new DenseInstance(2);
-            instance.setValue((Attribute)fvWekaAttributes.elementAt(0), 26.37551941); //max
-            instance.setValue((Attribute)fvWekaAttributes.elementAt(1), -28.489334331); //min
+            //Our instance
+            Instance dataInstance = new DenseInstance(newDataEntry.numAttributes());
+            newDataEntry.add(dataInstance);
+            double min = -4.96257917;
+            double max = 3.747140604;
 
-            // add the instance
-            dataset.add(instance);
+            dataInstance.setValue((Attribute)attributes.elementAt(0), min);
+            dataInstance.setValue((Attribute)attributes.elementAt(1), max);
 
-            Classifier cls;
+            dataInstance.setMissing(2); //set which attribute is missing from the new data set (class)
+            dataInstance.setDataset(newDataEntry);
 
+            // deserialize model
             ObjectInputStream ois = new ObjectInputStream(
                     getAssets().open("J48_walking_cycling_NEW.model"));
-            cls = (J48) ois.readObject();
+            Classifier cls = (Classifier) ois.readObject();
             ois.close();
+            double fDistribution = cls.classifyInstance(dataInstance);
+            Log.d("WEKA", fDistribution + "");
 
-//            Evaluation eTest = new Evaluation(dataset);
-//            eTest.evaluateModel(cls, dataset);
-
-            String strSummary = instance.toString();
-            Log.d(DEBUG_TAG, "Summary: " + strSummary);
-
-            // Get the confusion matrix
-        //    double[][] cmMatrix = eTest.confusionMatrix();
-
-            instance.setDataset(dataset);
-
-            // Get the likelihood of each classes
-            // fDistribution[0] is the probability of being “positive”
-            // fDistribution[1] is the probability of being “negative”
-            double[] fDistribution = cls.distributionForInstance(instance);
-
-            Log.d(DEBUG_TAG, "Class: " + cls.classifyInstance(instance));
-
-            for (int i = 0; i < fDistribution.length; i++){
-                Log.d(DEBUG_TAG, "Distribution: " + fDistribution[i]);
-            }
-
-        }
-        catch (Exception e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
