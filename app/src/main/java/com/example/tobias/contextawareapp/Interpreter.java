@@ -16,9 +16,15 @@ import weka.core.Instances;
 
 public class Interpreter {
 
-    static public double interpret(InputStream model, String[] classes, String[] attributesArray, Double[] data) throws Exception
-    {
+    private InputStream model;
 
+    public Interpreter(InputStream model)
+    {
+        this.model = model;
+    }
+
+    public double interpret(String[] classes, String[] attributesArray, Double[] data) throws Exception
+    {
         // Declare the class attribute along with its values
         FastVector fvClassVal = new FastVector(classes.length);
 
@@ -30,13 +36,7 @@ public class Interpreter {
         Attribute ClassAttribute = new Attribute("qt", fvClassVal);
 
         // Declare the feature vector
-        FastVector attributes = new FastVector(3);
-
-    /*    Attribute minMagAttr = new Attribute("min");
-        Attribute maxMagAttr = new Attribute("max");
-        attributes.addElement(minMagAttr);
-        attributes.addElement(maxMagAttr);
-       */
+        FastVector attributes = new FastVector(attributesArray.length + 1);
 
         for (int i = 0; i < attributesArray.length; i++)
         {
@@ -47,7 +47,7 @@ public class Interpreter {
         attributes.addElement(ClassAttribute);
 
         // Create empty instance
-        Instances newDataEntry = new Instances("Rel", attributes, attributesArray.length + 1);
+        Instances newDataEntry = new Instances("Rel", attributes, 1);
         newDataEntry.setClassIndex(newDataEntry.numAttributes() - 1);
 
         //Our instance
@@ -61,8 +61,8 @@ public class Interpreter {
 
         dataInstance.setDataset(newDataEntry);
         // deserialize model
-        ObjectInputStream ois = new ObjectInputStream(model
-                );
+        ObjectInputStream ois = new ObjectInputStream(this.model);
+
         Classifier cls = (Classifier) ois.readObject();
         ois.close();
         return cls.classifyInstance(dataInstance);
