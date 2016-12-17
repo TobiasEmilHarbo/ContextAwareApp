@@ -1,15 +1,9 @@
 package com.example.tobias.contextawareapp;
 
-import android.hardware.Sensor;
-import android.hardware.SensorEvent;
-import android.hardware.SensorEventListener;
-import android.hardware.SensorManager;
 import android.media.MediaScannerConnection;
-import android.os.Looper;
 import android.os.PowerManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -17,16 +11,10 @@ import android.widget.Toast;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.ObjectInputStream;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.concurrent.LinkedBlockingDeque;
-
-import weka.classifiers.trees.J48;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -56,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
 
         final ActivityWidget activityWidget = new ActivityWidget(getApplicationContext());
 
+        final LocationWidget locationWidget = new LocationWidget(this);
 
         writeDataToFileBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -99,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
         startLoggingBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                activityWidget.startDatagathering();
+                locationWidget.startDatagathering();
             }
         });
 
