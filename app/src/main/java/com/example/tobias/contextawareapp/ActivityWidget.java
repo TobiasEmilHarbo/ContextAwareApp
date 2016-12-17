@@ -9,6 +9,7 @@ import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
 
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -36,6 +37,8 @@ public class ActivityWidget {
     final private LinkedBlockingDeque<Float[]> activityLog = new LinkedBlockingDeque<>(windowSampleSize * 2);
     private double gravity = 9.816;
     private List<Double[]> windowsResults = new ArrayList<>();
+
+    InputStream model;
 
     public ActivityWidget(Context context){
         this.context = context;
@@ -129,7 +132,7 @@ public class ActivityWidget {
             float y = log[1];
             float z = log[2];
 
-            Log.d(DEBUG_TAG, x + " : " + y + " : " + z);
+            //Log.d(DEBUG_TAG, x + " : " + y + " : " + z);
 
             norm = calcEuclideanNorm(x, y, z);
 
@@ -155,6 +158,7 @@ public class ActivityWidget {
         Log.d(DEBUG_TAG, "min: " + min + " | max: " + max + " | standard deviation: " + standardDeviation );
 
         windowsResults.add(new Double[]{
+
                 min,
                 max,
                 standardDeviation
@@ -186,12 +190,6 @@ public class ActivityWidget {
         }catch (NullPointerException e) {} //ignore
 
         sensorManager.registerListener(eventListener, accelerometer, SensorManager.SENSOR_DELAY_NORMAL);
-    }
-
-    public void pauseDatagathering() {
-        try {
-            sensorManager.unregisterListener(eventListener);
-        }catch (NullPointerException e) {} //ignore
     }
 
     public void clearData() {

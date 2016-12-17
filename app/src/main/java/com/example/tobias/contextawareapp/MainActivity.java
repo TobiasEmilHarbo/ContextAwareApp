@@ -90,6 +90,7 @@ public class MainActivity extends AppCompatActivity {
         startLoggingBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
+                activityWidget.startDatagathering();
                 locationWidget.startDatagathering();
             }
         });
@@ -104,7 +105,7 @@ public class MainActivity extends AppCompatActivity {
         clearDataBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                locationWidget.clearData();
+                activityWidget.clearData();
             }
         });
 

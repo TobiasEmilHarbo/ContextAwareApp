@@ -65,7 +65,7 @@ public class LocationWidget{
             private int samplesSinceLastWindow = 0;
 
             public void onLocationChanged(Location location){
-                Log.d(DEBUG_TAG, "LOCATION CHANGED: Long: " + location.getLongitude() + " Lat: " + location.getLatitude());
+                //Log.d(DEBUG_TAG, "LOCATION CHANGED: Long: " + location.getLongitude() + " Lat: " + location.getLatitude());
 
                 logData( (float)location.getLongitude(),(float)location.getLatitude());
 
@@ -132,7 +132,7 @@ public class LocationWidget{
 
             sumOfDistances += distBetweenWorkAndCurrent;
 
-            Log.d(DEBUG_TAG, "Dist: " + distBetweenWorkAndCurrent);
+            //Log.d(DEBUG_TAG, "Dist: " + distBetweenWorkAndCurrent);
         }
 
         averageDistance = sumOfDistances/windowSampleSize;
@@ -140,12 +140,6 @@ public class LocationWidget{
         windowsResults.add(averageDistance);
 
         Log.d(DEBUG_TAG, "Average: " + averageDistance);
-
-
-    }
-
-    public void pauseDatagathering() {
-
     }
 
     private double calcEuclidianDist(double prevEasting, double prevNorthing, double currentEasting, double currentNorthing) {
