@@ -4,7 +4,6 @@ import android.Manifest;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.PackageManager;
-import android.hardware.Sensor;
 import android.location.Location;
 import android.location.LocationListener;
 import android.location.LocationManager;
@@ -23,6 +22,11 @@ import java.util.concurrent.LinkedBlockingDeque;
  */
 
 public class LocationWidget{
+
+    private Double workEasting;
+    private Double workNorthing;
+    private Deg2UTM converter;
+
     private LocationListener locationListener;
     private LocationManager locationManager;
 
@@ -31,30 +35,18 @@ public class LocationWidget{
     final private String DEBUG_TAG = this.getClass().getSimpleName();
 
     private boolean queueHasReachedSampleSize = false;
-    private int windowSampleSize = 10;
+    private int windowSampleSize = 128;
     final private LinkedBlockingDeque<Float[]> activityLog = new LinkedBlockingDeque<>(windowSampleSize * 2);
-    private List<Double[]> windowsResults = new ArrayList<>();
+    private List<Double> windowsResults = new ArrayList<>();
 
     public LocationWidget(Activity activity) {
         this.activity = activity;
-    }
+        converter = new Deg2UTM();
 
-    private void startWindow()
-    {
-        double averageLongitude = 0.0;
-        double averageLatitude = 0.0;
+        converter.convert(56.172649, 10.189055);
 
-        for (Float[] log : activityLog) {
-            averageLongitude += log[0];
-            averageLatitude += log[1];
-        }
-
-        Log.d(DEBUG_TAG, "AvgLong:" + averageLongitude + " | AvgLat: " + averageLatitude );
-
-        windowsResults.add(new Double[]{
-                averageLongitude,
-                averageLatitude
-        });
+        workEasting = converter.getEasting();
+        workNorthing = converter.getNorthing();
     }
 
     public void startDatagathering() {
@@ -70,7 +62,7 @@ public class LocationWidget{
 
         locationListener = new LocationListener() {
 
-            int samplesSinceLastWindow = 0;
+            private int samplesSinceLastWindow = 0;
 
             public void onLocationChanged(Location location){
                 Log.d(DEBUG_TAG, "LOCATION CHANGED: Long: " + location.getLongitude() + " Lat: " + location.getLatitude());
@@ -115,12 +107,55 @@ public class LocationWidget{
             }
         };
 
-        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 0, locationListener);
+        locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+
+    }
+
+    private void startWindow()
+    {
+        double sumOfDistances = 0.0;
+        double averageDistance;
+
+
+        int samplesSoFar = 0;
+
+        for (Float[] log : activityLog) {
+
+            if(samplesSoFar >= windowSampleSize) break;
+            samplesSoFar++;
+
+            converter.convert(log[1], log[0]);
+            double currentEasting = converter.getEasting();
+            double currentNorthing = converter.getNorthing();
+
+            double distBetweenWorkAndCurrent = calcEuclidianDist(workEasting, workNorthing, currentEasting, currentNorthing);
+
+            sumOfDistances += distBetweenWorkAndCurrent;
+
+            Log.d(DEBUG_TAG, "Dist: " + distBetweenWorkAndCurrent);
+        }
+
+        averageDistance = sumOfDistances/windowSampleSize;
+
+        windowsResults.add(averageDistance);
+
+        Log.d(DEBUG_TAG, "Average: " + averageDistance);
+
 
     }
 
     public void pauseDatagathering() {
 
+    }
+
+    private double calcEuclidianDist(double prevEasting, double prevNorthing, double currentEasting, double currentNorthing) {
+        double sumOfX = 0;
+        double sumOfY = 0;
+
+        sumOfX += Math.pow(prevEasting - currentEasting, 2);
+        sumOfY += Math.pow(prevNorthing - currentNorthing, 2);
+
+        return Math.sqrt(sumOfX + sumOfY);
     }
 
     public void clearData() {
@@ -137,5 +172,9 @@ public class LocationWidget{
         {
             activityLog.pollLast();
         }
+    }
+
+    public List<Double> getWindowResults(){
+        return windowsResults;
     }
 }

@@ -20,7 +20,7 @@ public class MainActivity extends AppCompatActivity {
 
     final private String DEBUG_TAG = this.getClass().getSimpleName();
 
-    private List<Double[]> windowsResults = new ArrayList<>();
+    private List<Double> windowsResults;
     private PowerManager.WakeLock wakeLock;
 
     @Override
@@ -61,8 +61,10 @@ public class MainActivity extends AppCompatActivity {
 
                         BufferedWriter writer = new BufferedWriter(new FileWriter(file, false));
 
-                        for (Double[] result : windowsResults) {
-                            String log = result[0] + ", " + result[1] + ", " + result[2];
+                        windowsResults = locationWidget.getWindowResults();
+
+                        for (Double result : windowsResults) {
+                            String log = result.toString();
                             writer.write(log);
                             writer.write("\r\n");
                         }
@@ -102,7 +104,7 @@ public class MainActivity extends AppCompatActivity {
         clearDataBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //activityWidget.clearData();
+                locationWidget.clearData();
             }
         });
 
