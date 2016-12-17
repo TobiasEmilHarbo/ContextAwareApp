@@ -44,6 +44,7 @@ public class MainActivity extends AppCompatActivity {
 
         final ActivityWidget activityWidget = new ActivityWidget(getApplicationContext());
 
+        final LocationWidget locationWidget = new LocationWidget(this);
 
         writeDataToFileBtn.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -87,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
         startLoggingBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                activityWidget.startDatagathering();
+                locationWidget.startDatagathering();
             }
         });
 
