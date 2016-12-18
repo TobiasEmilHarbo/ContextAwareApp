@@ -91,8 +91,7 @@ public class MainActivity extends AppCompatActivity {
         startLoggingBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                activityWidget.startDatagathering();
-                locationWidget.startDatagathering(new NewWindowsResultsCallback() {
+                activityWidget.startDataGathering(new NewWindowsResultsCallback() {
                     @Override
                     public void calculated() {
 
@@ -113,6 +112,8 @@ public class MainActivity extends AppCompatActivity {
                         }
                     }
                 });
+
+                locationWidget.startDataGathering();
             }
         });
 

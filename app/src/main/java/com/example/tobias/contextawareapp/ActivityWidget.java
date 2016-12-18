@@ -37,7 +37,10 @@ public class ActivityWidget {
     private double gravity = 9.816;
     private List<Double[]> windowResults = new ArrayList<>();
 
-    public ActivityWidget(Context context){
+    private NewWindowsResultsCallback newWindowsResultsCallback;
+
+    public ActivityWidget(Context context) {
+
         this.context = context;
 
         sensorManager = (SensorManager) getContext().getSystemService(SENSOR_SERVICE);
@@ -155,11 +158,16 @@ public class ActivityWidget {
         Log.d(DEBUG_TAG, "min: " + min + " | max: " + max + " | standard deviation: " + standardDeviation );
 
         windowResults.add(new Double[]{
-
                 min,
                 max,
                 standardDeviation
         });
+
+        try {
+            newWindowsResultsCallback.calculated();
+        } catch (NullPointerException e) {
+            //ignore
+        }
     }
 
     private double calcEuclideanNorm(float x, float y, float z)
@@ -181,7 +189,12 @@ public class ActivityWidget {
         return Math.sqrt(variance);
     }
 
-    public void startDatagathering() {
+    public void startDataGathering(NewWindowsResultsCallback newWindowsResultsCallback) {
+        this.newWindowsResultsCallback = newWindowsResultsCallback;
+        this.startDataGathering();
+    }
+
+    public void startDataGathering() {
         try {
             sensorManager.unregisterListener(eventListener);
         }catch (NullPointerException e) {} //ignore

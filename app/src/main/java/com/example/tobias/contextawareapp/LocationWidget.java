@@ -39,7 +39,7 @@ public class LocationWidget{
     final private LinkedBlockingDeque<Float[]> activityLog = new LinkedBlockingDeque<>(windowSampleSize * 2);
     private List<Double> windowsResults = new ArrayList<>();
 
-    private NewWindowsResultsCallback callback;
+    private NewWindowsResultsCallback newWindowsResultsCallback;
 
     public LocationWidget(Activity activity) {
         this.activity = activity;
@@ -51,9 +51,7 @@ public class LocationWidget{
         workNorthing = converter.getNorthing();
     }
 
-    public void startDatagathering(NewWindowsResultsCallback callback) {
-
-        this.callback = callback;
+    public void startDataGathering() {
 
         if (ActivityCompat.checkSelfPermission(activity.getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
@@ -113,14 +111,17 @@ public class LocationWidget{
         };
 
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
+    }
 
+    public void startDataGathering(NewWindowsResultsCallback nowWindowsResultsCallback) {
+        this.newWindowsResultsCallback = nowWindowsResultsCallback;
+        this.startDataGathering();
     }
 
     private void startWindow()
     {
         double sumOfDistances = 0.0;
         double averageDistance;
-
 
         int samplesSoFar = 0;
 
@@ -143,7 +144,11 @@ public class LocationWidget{
 
         windowsResults.add(averageDistance);
 
-        callback.calculated();
+        try {
+            newWindowsResultsCallback.calculated();
+        } catch (NullPointerException e) {
+            //ignore
+        }
 
         Log.d(DEBUG_TAG, "Average: " + averageDistance);
     }
