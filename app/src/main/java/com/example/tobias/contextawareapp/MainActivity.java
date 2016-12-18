@@ -13,14 +13,13 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
     final private String DEBUG_TAG = this.getClass().getSimpleName();
 
-    private List<Double> windowsResults;
+    private List<Double> windowResults;
     private PowerManager.WakeLock wakeLock;
 
     @Override
@@ -61,9 +60,9 @@ public class MainActivity extends AppCompatActivity {
 
                         BufferedWriter writer = new BufferedWriter(new FileWriter(file, false));
 
-                        windowsResults = locationWidget.getWindowResults();
+                        windowResults = locationWidget.getWindowResults();
 
-                        for (Double result : windowsResults) {
+                        for (Double result : windowResults) {
                             String log = result.toString();
                             writer.write(log);
                             writer.write("\r\n");
@@ -78,7 +77,7 @@ public class MainActivity extends AppCompatActivity {
                         e.printStackTrace();
                     }
 
-                    Toast.makeText(getApplicationContext(), windowsResults.size() + " records was written to " + fileName, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), windowResults.size() + " records was written to " + fileName, Toast.LENGTH_SHORT).show();
                 }
                 else
                 {
@@ -90,7 +89,7 @@ public class MainActivity extends AppCompatActivity {
         startLoggingBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                activityWidget.startDatagathering();
+                //activityWidget.startDatagathering();
                 locationWidget.startDatagathering();
             }
         });

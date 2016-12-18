@@ -35,7 +35,7 @@ public class LocationWidget{
     final private String DEBUG_TAG = this.getClass().getSimpleName();
 
     private boolean queueHasReachedSampleSize = false;
-    private int windowSampleSize = 128;
+    private int windowSampleSize = 32;
     final private LinkedBlockingDeque<Float[]> activityLog = new LinkedBlockingDeque<>(windowSampleSize * 2);
     private List<Double> windowsResults = new ArrayList<>();
 
@@ -65,7 +65,7 @@ public class LocationWidget{
             private int samplesSinceLastWindow = 0;
 
             public void onLocationChanged(Location location){
-                //Log.d(DEBUG_TAG, "LOCATION CHANGED: Long: " + location.getLongitude() + " Lat: " + location.getLatitude());
+                Log.d(DEBUG_TAG, "LOCATION CHANGED: Long: " + location.getLongitude() + " Lat: " + location.getLatitude());
 
                 logData( (float)location.getLongitude(),(float)location.getLatitude());
 
@@ -132,7 +132,7 @@ public class LocationWidget{
 
             sumOfDistances += distBetweenWorkAndCurrent;
 
-            //Log.d(DEBUG_TAG, "Dist: " + distBetweenWorkAndCurrent);
+            Log.d(DEBUG_TAG, "Dist: " + distBetweenWorkAndCurrent);
         }
 
         averageDistance = sumOfDistances/windowSampleSize;

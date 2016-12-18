@@ -38,8 +38,6 @@ public class ActivityWidget {
     private double gravity = 9.816;
     private List<Double[]> windowsResults = new ArrayList<>();
 
-    InputStream model;
-
     public ActivityWidget(Context context){
         this.context = context;
 
@@ -196,5 +194,9 @@ public class ActivityWidget {
         activityLog.clear();
         windowsResults.clear();
         Toast.makeText(getContext(), "Array was cleared.", Toast.LENGTH_SHORT).show();
+    }
+
+    public Double[] getNewestWindow() {
+        return windowsResults.get(0);
     }
 }
