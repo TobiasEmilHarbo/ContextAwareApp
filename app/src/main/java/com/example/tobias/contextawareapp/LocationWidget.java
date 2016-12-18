@@ -174,10 +174,6 @@ public class LocationWidget{
         }
     }
 
-    public List<Double> getWindowResults(){
-        return windowsResults;
-    }
-
     public Double getNewestWindow() {
         return windowsResults.get(windowsResults.size() - 1);
     }

@@ -195,7 +195,7 @@ public class ActivityWidget {
         Toast.makeText(getContext(), "Array was cleared.", Toast.LENGTH_SHORT).show();
     }
 
-    public Double[] getNewestWindow() {
+    public Double[] getNewestWindow() throws ArrayIndexOutOfBoundsException {
         return windowResults.get(windowResults.size() - 1);
     }
 }

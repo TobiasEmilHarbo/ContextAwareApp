@@ -4,6 +4,7 @@ import android.media.MediaScannerConnection;
 import android.os.PowerManager;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -78,7 +79,7 @@ public class MainActivity extends AppCompatActivity {
                         e.printStackTrace();
                     }
 
-                    Toast.makeText(getApplicationContext(), windowResults.size() + " records was written to " + fileName, Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getApplicationContext(), activityAndLocationData.size() + " records was written to " + fileName, Toast.LENGTH_SHORT).show();
                 }
                 else
                 {
@@ -90,20 +91,26 @@ public class MainActivity extends AppCompatActivity {
         startLoggingBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                //activityWidget.startDatagathering();
+                activityWidget.startDatagathering();
                 locationWidget.startDatagathering(new NewWindowsResultsCallback() {
                     @Override
                     public void calculated() {
 
-                        Double[] newestActivityData = activityWidget.getNewestWindow();
-                        Double newestLocationData = locationWidget.getNewestWindow();
+                        try {
 
-                        activityAndLocationData.add(new Double[]{
-                                newestActivityData[0],
-                                newestActivityData[1],
-                                newestActivityData[2],
-                                newestLocationData
-                        });
+                            Toast.makeText(getApplicationContext(), "Logging Started", Toast.LENGTH_SHORT).show();
+                            Double[] newestActivityData = activityWidget.getNewestWindow();
+                            Double newestLocationData = locationWidget.getNewestWindow();
+
+                            activityAndLocationData.add(new Double[]{
+                                    newestActivityData[0],
+                                    newestActivityData[1],
+                                    newestActivityData[2],
+                                    newestLocationData
+                            });
+                        }catch (ArrayIndexOutOfBoundsException e){
+                            Log.d(DEBUG_TAG, "No data from accelerometer");
+                        }
                     }
                 });
             }
