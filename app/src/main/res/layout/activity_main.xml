@@ -10,49 +10,4 @@
     android:paddingTop="@dimen/activity_vertical_margin"
     tools:context="com.example.tobias.contextawareapp.MainActivity">
 
-    <Button
-        android:text="Start Data Logging"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_centerHorizontal="true"
-        android:id="@+id/start_loggin_btn" />
-
-    <Button
-        android:text="Pause Data Logging"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/start_loggin_btn"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="19dp"
-        android:id="@+id/pause_logging_btn" />
-
-    <Button
-        android:text="Clear data array"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="22dp"
-        android:id="@+id/clear_data_btn"
-        android:layout_below="@+id/pause_logging_btn"
-        android:layout_centerHorizontal="true" />
-
-    <EditText
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:inputType="textPersonName"
-        android:ems="10"
-        android:layout_below="@+id/clear_data_btn"
-        android:layout_centerHorizontal="true"
-        android:layout_marginTop="53dp"
-        android:id="@+id/file_name_txt"
-        android:hint="CSV file name" />
-
-    <Button
-        android:text="Write data array to file"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="14dp"
-        android:id="@+id/write_data_to_file_btn"
-        android:layout_below="@+id/file_name_txt"
-        android:layout_centerHorizontal="true" />
 </RelativeLayout>
