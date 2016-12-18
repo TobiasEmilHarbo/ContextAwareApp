@@ -9,7 +9,6 @@ import android.os.Looper;
 import android.util.Log;
 import android.widget.Toast;
 
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.LinkedBlockingDeque;
@@ -36,7 +35,7 @@ public class ActivityWidget {
 
     final private LinkedBlockingDeque<Float[]> activityLog = new LinkedBlockingDeque<>(windowSampleSize * 2);
     private double gravity = 9.816;
-    private List<Double[]> windowsResults = new ArrayList<>();
+    private List<Double[]> windowResults = new ArrayList<>();
 
     public ActivityWidget(Context context){
         this.context = context;
@@ -155,7 +154,7 @@ public class ActivityWidget {
 
         Log.d(DEBUG_TAG, "min: " + min + " | max: " + max + " | standard deviation: " + standardDeviation );
 
-        windowsResults.add(new Double[]{
+        windowResults.add(new Double[]{
 
                 min,
                 max,
@@ -192,11 +191,11 @@ public class ActivityWidget {
 
     public void clearData() {
         activityLog.clear();
-        windowsResults.clear();
+        windowResults.clear();
         Toast.makeText(getContext(), "Array was cleared.", Toast.LENGTH_SHORT).show();
     }
 
     public Double[] getNewestWindow() {
-        return windowsResults.get(0);
+        return windowResults.get(windowResults.size() - 1);
     }
 }

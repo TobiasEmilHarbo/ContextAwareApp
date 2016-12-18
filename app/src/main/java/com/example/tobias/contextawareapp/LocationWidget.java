@@ -39,6 +39,8 @@ public class LocationWidget{
     final private LinkedBlockingDeque<Float[]> activityLog = new LinkedBlockingDeque<>(windowSampleSize * 2);
     private List<Double> windowsResults = new ArrayList<>();
 
+    private NewWindowsResultsCallback callback;
+
     public LocationWidget(Activity activity) {
         this.activity = activity;
         converter = new Deg2UTM();
@@ -49,7 +51,10 @@ public class LocationWidget{
         workNorthing = converter.getNorthing();
     }
 
-    public void startDatagathering() {
+    public void startDatagathering(NewWindowsResultsCallback callback) {
+
+        this.callback = callback;
+
         if (ActivityCompat.checkSelfPermission(activity.getApplicationContext(), Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
             ActivityCompat.requestPermissions(activity,
@@ -131,13 +136,14 @@ public class LocationWidget{
             double distBetweenWorkAndCurrent = calcEuclidianDist(workEasting, workNorthing, currentEasting, currentNorthing);
 
             sumOfDistances += distBetweenWorkAndCurrent;
-
             Log.d(DEBUG_TAG, "Dist: " + distBetweenWorkAndCurrent);
         }
 
         averageDistance = sumOfDistances/windowSampleSize;
 
         windowsResults.add(averageDistance);
+
+        callback.calculated();
 
         Log.d(DEBUG_TAG, "Average: " + averageDistance);
     }
@@ -170,5 +176,9 @@ public class LocationWidget{
 
     public List<Double> getWindowResults(){
         return windowsResults;
+    }
+
+    public Double getNewestWindow() {
+        return windowsResults.get(windowsResults.size() - 1);
     }
 }

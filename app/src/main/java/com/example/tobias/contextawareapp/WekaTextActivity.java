@@ -1,22 +1,13 @@
 package com.example.tobias.contextawareapp;
 
 import android.os.Bundle;
-import android.os.Environment;
+
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 
-import java.io.BufferedReader;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.ObjectInputStream;
 
-import weka.classifiers.Classifier;
-import weka.core.Attribute;
-import weka.core.DenseInstance;
-import weka.core.FastVector;
-import weka.core.Instance;
-import weka.core.Instances;
 
 /**
  * Created by Tobias on 17/12/2016.
@@ -35,6 +26,8 @@ public class WekaTextActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
 
+        new CalendarWidget();
+
         try {
 
             InputStream model = getAssets().open("J48_walking_cycling_NEW.model");
@@ -42,9 +35,10 @@ public class WekaTextActivity extends AppCompatActivity {
             Interpreter interpreter = new Interpreter(model);
             double classification = interpreter.interpret(
                     new String[]{"cycling", "walk"},
-                    new String[]{"min",         "max"},
-                    new Double[]{-7.440355312,  5.97923057}
+                    new String[]{"min", "max"},
+                    new Double[]{-7.440355312, 5.97923057}
             );
+
             Log.d(DEBUG_TAG, "Class: " + classification);
 
         } catch (Exception e) {

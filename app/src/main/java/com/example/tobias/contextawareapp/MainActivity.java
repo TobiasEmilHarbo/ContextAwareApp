@@ -13,6 +13,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
@@ -21,6 +22,8 @@ public class MainActivity extends AppCompatActivity {
 
     private List<Double> windowResults;
     private PowerManager.WakeLock wakeLock;
+
+    private List<Double[]> activityAndLocationData = new ArrayList<>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,10 +63,8 @@ public class MainActivity extends AppCompatActivity {
 
                         BufferedWriter writer = new BufferedWriter(new FileWriter(file, false));
 
-                        windowResults = locationWidget.getWindowResults();
-
-                        for (Double result : windowResults) {
-                            String log = result.toString();
+                        for (Double[] result : activityAndLocationData) {
+                            String log = result[0] + ", " + result[1] + ", " + result[2] + ", " + result[3];
                             writer.write(log);
                             writer.write("\r\n");
                         }
@@ -90,7 +91,21 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
                 //activityWidget.startDatagathering();
-                locationWidget.startDatagathering();
+                locationWidget.startDatagathering(new NewWindowsResultsCallback() {
+                    @Override
+                    public void calculated() {
+
+                        Double[] newestActivityData = activityWidget.getNewestWindow();
+                        Double newestLocationData = locationWidget.getNewestWindow();
+
+                        activityAndLocationData.add(new Double[]{
+                                newestActivityData[0],
+                                newestActivityData[1],
+                                newestActivityData[2],
+                                newestLocationData
+                        });
+                    }
+                });
             }
         });
 
