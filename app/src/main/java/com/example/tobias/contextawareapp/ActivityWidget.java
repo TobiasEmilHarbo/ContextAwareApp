@@ -37,7 +37,7 @@ public class ActivityWidget {
     private double gravity = 9.816;
     private List<Double[]> windowResults = new ArrayList<>();
 
-    private NewWindowsResultsCallback newWindowsResultsCallback;
+    private OnNewWindowResultCallback onNewWindowResultCallback;
 
     public ActivityWidget(Context context) {
 
@@ -164,7 +164,7 @@ public class ActivityWidget {
         });
 
         try {
-            newWindowsResultsCallback.calculated();
+            onNewWindowResultCallback.onNewResult();
         } catch (NullPointerException e) {
             //ignore
         }
@@ -189,8 +189,8 @@ public class ActivityWidget {
         return Math.sqrt(variance);
     }
 
-    public void startDataGathering(NewWindowsResultsCallback newWindowsResultsCallback) {
-        this.newWindowsResultsCallback = newWindowsResultsCallback;
+    public void startDataGathering(OnNewWindowResultCallback onNewWindowResultCallback) {
+        this.onNewWindowResultCallback = onNewWindowResultCallback;
         this.startDataGathering();
     }
 

@@ -39,7 +39,7 @@ public class LocationWidget{
     final private LinkedBlockingDeque<Float[]> activityLog = new LinkedBlockingDeque<>(windowSampleSize * 2);
     private List<Double> windowsResults = new ArrayList<>();
 
-    private NewWindowsResultsCallback newWindowsResultsCallback;
+    private OnNewWindowResultCallback onNewWindowResultCallback;
 
     public LocationWidget(Activity activity) {
         this.activity = activity;
@@ -113,8 +113,8 @@ public class LocationWidget{
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
     }
 
-    public void startDataGathering(NewWindowsResultsCallback nowWindowsResultsCallback) {
-        this.newWindowsResultsCallback = nowWindowsResultsCallback;
+    public void startDataGathering(OnNewWindowResultCallback onNewWindowResultCallback) {
+        this.onNewWindowResultCallback = onNewWindowResultCallback;
         this.startDataGathering();
     }
 
@@ -145,7 +145,7 @@ public class LocationWidget{
         windowsResults.add(averageDistance);
 
         try {
-            newWindowsResultsCallback.calculated();
+            onNewWindowResultCallback.onNewResult();
         } catch (NullPointerException e) {
             //ignore
         }

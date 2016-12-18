@@ -4,6 +4,6 @@ package com.example.tobias.contextawareapp;
  * Created by Tobias on 18/12/2016.
  */
 
-public interface NewWindowsResultsCallback {
-    void calculated();
+public interface OnNewWindowResultCallback {
+    void onNewResult();
 }
