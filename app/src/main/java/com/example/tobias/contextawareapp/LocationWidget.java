@@ -21,7 +21,7 @@ import java.util.concurrent.LinkedBlockingDeque;
  * Created by rasmus on 17/12/2016.
  */
 
-public class LocationWidget{
+public class LocationWidget implements Widget{
 
     private Double workEasting;
     private Double workNorthing;
@@ -37,11 +37,11 @@ public class LocationWidget{
     private boolean queueHasReachedSampleSize = false;
     private int windowSampleSize = 32;
     final private LinkedBlockingDeque<Float[]> activityLog = new LinkedBlockingDeque<>(windowSampleSize * 2);
-    private List<Double> windowsResults = new ArrayList<>();
+    private List<Double[]> windowResults = new ArrayList<>();
 
     private OnNewWindowResultCallback onNewWindowResultCallback;
 
-    public LocationWidget(Activity activity) {
+    public LocationWidget(Activity activity){
         this.activity = activity;
         converter = new Deg2UTM();
 
@@ -98,15 +98,15 @@ public class LocationWidget{
             }
 
             public void onStatusChanged(String provider, int status, Bundle extras) {
-                Log.d(DEBUG_TAG, "STATUS CHANGED");
+                //Log.d(DEBUG_TAG, "STATUS CHANGED");
             }
 
             public void onProviderEnabled(String provider) {
-                Log.d(DEBUG_TAG, "ENABLED");
+                //Log.d(DEBUG_TAG, "ENABLED");
             }
 
             public void onProviderDisabled(String provider) {
-                Log.d(DEBUG_TAG, "DISABLED");
+                //Log.d(DEBUG_TAG, "DISABLED");
             }
         };
 
@@ -137,20 +137,19 @@ public class LocationWidget{
             double distBetweenWorkAndCurrent = calcEuclidianDist(workEasting, workNorthing, currentEasting, currentNorthing);
 
             sumOfDistances += distBetweenWorkAndCurrent;
-            Log.d(DEBUG_TAG, "Dist: " + distBetweenWorkAndCurrent);
         }
 
         averageDistance = sumOfDistances/windowSampleSize;
 
-        windowsResults.add(averageDistance);
+        windowResults.add(new Double[]{averageDistance});
+
+        Log.d(DEBUG_TAG, "-------- New entry in window results array --------");
 
         try {
             onNewWindowResultCallback.onNewResult();
         } catch (NullPointerException e) {
             //ignore
         }
-
-        Log.d(DEBUG_TAG, "Average: " + averageDistance);
     }
 
     private double calcEuclidianDist(double prevEasting, double prevNorthing, double currentEasting, double currentNorthing) {
@@ -165,7 +164,7 @@ public class LocationWidget{
 
     public void clearData() {
         activityLog.clear();
-        windowsResults.clear();
+        windowResults.clear();
         Toast.makeText(activity.getApplicationContext(), "Array was cleared.", Toast.LENGTH_SHORT).show();
     }
 
@@ -179,7 +178,15 @@ public class LocationWidget{
         }
     }
 
-    public Double getNewestWindow() {
-        return windowsResults.get(windowsResults.size() - 1);
+    public Double[] getNewestWindowResult() throws IndexOutOfBoundsException{
+        try
+        {
+            return windowResults.get(windowResults.size() - 1);
+        }
+        catch (IndexOutOfBoundsException e)
+        {
+            Log.d(DEBUG_TAG, "-------- NO ENTRIES HAVE BEEN STORED JET --------");
+            throw new IndexOutOfBoundsException(e.getMessage());
+        }
     }
 }

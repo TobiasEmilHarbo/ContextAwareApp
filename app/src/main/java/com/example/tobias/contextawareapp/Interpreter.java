@@ -1,7 +1,12 @@
 package com.example.tobias.contextawareapp;
 
+import android.util.Log;
+
+import java.io.IOException;
 import java.io.InputStream;
 import java.io.ObjectInputStream;
+import java.util.ArrayList;
+import java.util.List;
 
 import weka.classifiers.Classifier;
 import weka.core.Attribute;
@@ -15,16 +20,23 @@ import weka.core.Instances;
  */
 
 public class Interpreter {
+    final private String DEBUG_TAG = this.getClass().getSimpleName();
+    private final Classifier cls;
+    public static String[] classes = new String[]{
+            "walking_near", //0.0
+            "walking_far", //1.0
+            "cycling_near", //2.0
+            "cycling_far",
+    };
+    private List<Widget> widgets = new ArrayList<>();
 
-    private InputStream model;
-
-    public Interpreter(InputStream model)
-    {
-        this.model = model;
+    public Interpreter(InputStream model) throws IOException, ClassNotFoundException {
+        ObjectInputStream ois = new ObjectInputStream(model);
+        cls = (Classifier) ois.readObject();
+        ois.close();
     }
 
-    public double interpret(String[] classes, String[] attributesArray, Double[] data) throws Exception
-    {
+    public double interpret(String[] classes, String[] attributesArray, Double[] data) throws Exception {
         // Declare the class attribute along with its values
         FastVector fvClassVal = new FastVector(classes.length);
 
@@ -61,10 +73,39 @@ public class Interpreter {
 
         dataInstance.setDataset(newDataEntry);
         // deserialize model
-        ObjectInputStream ois = new ObjectInputStream(this.model);
 
-        Classifier cls = (Classifier) ois.readObject();
-        ois.close();
         return cls.classifyInstance(dataInstance);
+    }
+
+    public double interpret() throws Exception
+    {
+        Widget activityWidget = widgets.get(0);
+        Widget locationWidget = widgets.get(1);
+
+        double min = activityWidget.getNewestWindowResult()[0];
+        double max = activityWidget.getNewestWindowResult()[1];
+
+        double avg = locationWidget.getNewestWindowResult()[0];
+
+        Log.d(DEBUG_TAG, "min: "+ min + " max: "+ max + " avg: " + avg);
+
+        double classss = interpret(
+                classes,
+                new String[]{
+                        "min",
+                        "max",
+                        "avg_dist"
+                }, new Double[]{
+                        min,
+                        max,
+                        avg
+                });
+
+        return classss;
+    }
+
+    public void addWidget(Widget widget)
+    {
+        widgets.add(widget);
     }
 }

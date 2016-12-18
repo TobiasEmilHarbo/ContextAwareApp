@@ -19,7 +19,7 @@ import static android.content.Context.SENSOR_SERVICE;
  * Created by rasmus on 17/12/2016.
  */
 
-public class ActivityWidget {
+public class ActivityWidget implements Widget{
 
     private Context context;
 
@@ -59,6 +59,8 @@ public class ActivityWidget {
                 float sensorX = Math.abs(sensorEvent.values[0]);
                 float sensorY = Math.abs(sensorEvent.values[1]);
                 float sensorZ = Math.abs(sensorEvent.values[2]);
+
+                Log.d(DEBUG_TAG, "ACCELEROMETER CHANGED: X: " + sensorX + " Y: " + sensorY + " Z: " + sensorZ);
 
                 logData(sensorX, sensorY, sensorZ);
 
@@ -155,13 +157,15 @@ public class ActivityWidget {
 
         double standardDeviation = calcStandardDeviation(euclideanNorms, (totalNorm / windowSampleSize));
 
-        Log.d(DEBUG_TAG, "min: " + min + " | max: " + max + " | standard deviation: " + standardDeviation );
+        //Log.d(DEBUG_TAG, "min: " + min + " | max: " + max + " | standard deviation: " + standardDeviation );
 
         windowResults.add(new Double[]{
                 min,
                 max,
                 standardDeviation
         });
+
+        Log.d(DEBUG_TAG, "-------- New entry in window results array --------");
 
         try {
             onNewWindowResultCallback.onNewResult();
@@ -208,7 +212,15 @@ public class ActivityWidget {
         Toast.makeText(getContext(), "Array was cleared.", Toast.LENGTH_SHORT).show();
     }
 
-    public Double[] getNewestWindow() throws ArrayIndexOutOfBoundsException {
-        return windowResults.get(windowResults.size() - 1);
+    public Double[] getNewestWindowResult() throws IndexOutOfBoundsException {
+        try
+        {
+            return windowResults.get(windowResults.size() - 1);
+        }
+        catch (IndexOutOfBoundsException e)
+        {
+            Log.d(DEBUG_TAG, "-------- NO ENTRIES HAVE BEEN STORED JET --------");
+            throw new IndexOutOfBoundsException(e.getMessage());
+        }
     }
 }

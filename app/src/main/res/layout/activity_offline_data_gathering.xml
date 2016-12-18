@@ -8,7 +8,7 @@
     android:paddingLeft="@dimen/activity_horizontal_margin"
     android:paddingRight="@dimen/activity_horizontal_margin"
     android:paddingTop="@dimen/activity_vertical_margin"
-    tools:context="com.example.tobias.contextawareapp.OfflineDatagatheringActivity">
+    tools:context="com.example.tobias.contextawareapp.OfflineDataGatheringActivity">
 
     <Button
         android:text="Start Data Logging"

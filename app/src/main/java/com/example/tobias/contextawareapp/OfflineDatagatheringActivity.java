@@ -17,7 +17,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-public class OfflineDatagatheringActivity extends AppCompatActivity {
+public class OfflineDataGatheringActivity extends AppCompatActivity {
 
     final private String DEBUG_TAG = this.getClass().getSimpleName();
 
@@ -29,7 +29,7 @@ public class OfflineDatagatheringActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_offline_datagathering);
+        setContentView(R.layout.activity_offline_data_gathering);
 
         Button writeDataToFileBtn = (Button) findViewById(R.id.write_data_to_file_btn);
         Button startLoggingBtn = (Button) findViewById(R.id.start_loggin_btn);
@@ -102,14 +102,14 @@ public class OfflineDatagatheringActivity extends AppCompatActivity {
                         try {
 
                             Toast.makeText(getApplicationContext(), "Logging Started", Toast.LENGTH_SHORT).show();
-                            Double[] newestActivityData = activityWidget.getNewestWindow();
-                            Double newestLocationData = locationWidget.getNewestWindow();
+                            Double[] newestActivityData = activityWidget.getNewestWindowResult();
+                            Double[] newestLocationData = locationWidget.getNewestWindowResult();
 
                             activityAndLocationData.add(new Double[]{
                                     newestActivityData[0],
                                     newestActivityData[1],
                                     newestActivityData[2],
-                                    newestLocationData
+                                    newestLocationData[0]
                             });
                         }catch (ArrayIndexOutOfBoundsException e){
                             //Ignore
