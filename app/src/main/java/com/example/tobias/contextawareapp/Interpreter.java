@@ -20,14 +20,17 @@ import weka.core.Instances;
  */
 
 public class Interpreter {
+
     final private String DEBUG_TAG = this.getClass().getSimpleName();
     private final Classifier cls;
+
     public static String[] classes = new String[]{
             "walking_near", //0.0
-            "walking_far", //1.0
+            "walking_far",  //1.0
             "cycling_near", //2.0
-            "cycling_far",
+            "cycling_far",  //3.0
     };
+
     private List<Widget> widgets = new ArrayList<>();
 
     public Interpreter(InputStream model) throws IOException, ClassNotFoundException {
@@ -84,6 +87,7 @@ public class Interpreter {
 
         double min = activityWidget.getNewestWindowResult()[0];
         double max = activityWidget.getNewestWindowResult()[1];
+        double std = activityWidget.getNewestWindowResult()[1];
 
         double avg = locationWidget.getNewestWindowResult()[0];
 

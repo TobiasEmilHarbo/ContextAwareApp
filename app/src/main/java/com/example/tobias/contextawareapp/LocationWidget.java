@@ -39,7 +39,7 @@ public class LocationWidget implements Widget{
     final private LinkedBlockingDeque<Float[]> activityLog = new LinkedBlockingDeque<>(windowSampleSize * 2);
     private List<Double[]> windowResults = new ArrayList<>();
 
-    private OnNewWindowResultCallback onNewWindowResultCallback;
+    private OnNewWindowResultListener onNewWindowResultCallback;
 
     public LocationWidget(Activity activity){
         this.activity = activity;
@@ -113,7 +113,7 @@ public class LocationWidget implements Widget{
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
     }
 
-    public void startDataGathering(OnNewWindowResultCallback onNewWindowResultCallback) {
+    public void startDataGathering(OnNewWindowResultListener onNewWindowResultCallback) {
         this.onNewWindowResultCallback = onNewWindowResultCallback;
         this.startDataGathering();
     }

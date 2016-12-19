@@ -37,7 +37,7 @@ public class ActivityWidget implements Widget{
     private double gravity = 9.816;
     private List<Double[]> windowResults = new ArrayList<>();
 
-    private OnNewWindowResultCallback onNewWindowResultCallback;
+    private OnNewWindowResultListener onNewWindowResultCallback;
 
     public ActivityWidget(Context context) {
 
@@ -193,7 +193,7 @@ public class ActivityWidget implements Widget{
         return Math.sqrt(variance);
     }
 
-    public void startDataGathering(OnNewWindowResultCallback onNewWindowResultCallback) {
+    public void startDataGathering(OnNewWindowResultListener onNewWindowResultCallback) {
         this.onNewWindowResultCallback = onNewWindowResultCallback;
         this.startDataGathering();
     }

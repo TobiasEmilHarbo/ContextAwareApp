@@ -95,7 +95,7 @@ public class OfflineDataGatheringActivity extends AppCompatActivity {
         startLoggingBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                activityWidget.startDataGathering(new OnNewWindowResultCallback() {
+                activityWidget.startDataGathering(new OnNewWindowResultListener() {
                     @Override
                     public void onNewResult() {
 
