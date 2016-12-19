@@ -2,6 +2,7 @@ package com.example.tobias.contextawareapp;
 
 /**
  * Created by rasmus on 17/12/2016.
+ * The below implementation was copied from here: http://stackoverflow.com/questions/176137/java-convert-lat-lon-to-utm
  */
 
 public class Deg2UTM
