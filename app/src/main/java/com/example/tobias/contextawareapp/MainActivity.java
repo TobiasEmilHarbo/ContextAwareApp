@@ -4,77 +4,146 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.os.Handler;
+import android.media.RingtoneManager;
+import android.net.Uri;
 import android.support.v4.app.NotificationCompat;
 import android.support.v4.app.TaskStackBuilder;
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.widget.TextView;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
 
-import java.io.InputStream;
-import java.util.Calendar;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.StringTokenizer;
+
+import static android.app.Notification.PRIORITY_HIGH;
 
 public class MainActivity extends AppCompatActivity {
 
     final private String DEBUG_TAG = this.getClass().getSimpleName();
-    private LocationWidget locationWidget;
-    private ActivityWidget activityWidget;
-    private Interpreter activityAndLocationInterpreter;
-    final Aggregator aggregator = new Aggregator();
+    LocationActivityCalendarAggregator aggregator;
+    private Database database = new Database();
+    ArrayAdapter<String> reminderAdapter;
+    ArrayAdapter<String> eventAdapter;
+
+    private ArrayList<String> reminderList = new ArrayList<>();
+    private ArrayList<String> eventList = new ArrayList<>();
+    private CalendarWidget calendar;
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+    protected void onCreate(Bundle savedInstanceState)
+    {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        calendar = new CalendarWidget();
+        aggregator = new LocationActivityCalendarAggregator(this);
+
+        this.setEventList(new ArrayList<String>(){{add("No events found for this context");}});
+        this.setReminderList(new ArrayList<String>(){{add("No reminders found for this context");}});
+
+        eventAdapter = new ArrayAdapter<>(this,
+                R.layout.activity_listview, eventList);
+        ListView eventListView = (ListView) findViewById(R.id.event_list);
+        eventListView.setAdapter(eventAdapter);
+
+        reminderAdapter = new ArrayAdapter<>(this,
+                R.layout.activity_listview, reminderList);
+
+        ListView reminderListView = (ListView) findViewById(R.id.reminder_list);
+        reminderListView.setAdapter(reminderAdapter);
+
         try {
 
-            locationWidget = new LocationWidget(this);
-            activityWidget = new ActivityWidget(this);
+            aggregator.addContextListener(new ContextListener(){
 
-            InputStream model = getAssets().open("ActivityAndDistance_J48.model");
-            activityAndLocationInterpreter = new Interpreter(model);
-
-            activityAndLocationInterpreter.addWidget(activityWidget); //index 0
-            activityAndLocationInterpreter.addWidget(locationWidget); //index 1
-
-            final TextView viewById = (TextView) findViewById(R.id.logView);
-
-            aggregator.addInterpreter(activityAndLocationInterpreter);
-/*
-            locationWidget.startDataGathering();
-
-            activityWidget.startDataGathering(new OnNewWindowResultListener() {
                 @Override
-                public void onNewResult() {
+                public void onContextChange(Double context) {
 
-                runOnUiThread(new Runnable() {
-                    @Override
-                    public void run() {
-                        try
-                        {
-                            Calendar dateTime = Calendar.getInstance();
+                    Log.d(DEBUG_TAG, "CONTEXT: " + context);
 
-                            Double classs = aggregator.getReminders();
+                    if (context == LocationActivityCalendarAggregator.locationActivityContexts.indexOf(LocationActivityCalendarAggregator.CYCLING_NEAR)
+                            || context == LocationActivityCalendarAggregator.locationActivityContexts.indexOf(LocationActivityCalendarAggregator.WALKING_NEAR)) {
+                        List<Event> events = calendar.getEventsWithTagsOfDate(new String[]{"Work"}, "19-12-2016");
+                        List<HashMap<String, String>> reminders = database.getReminders("tag", "work"); //tag == work
 
-                            Log.d(DEBUG_TAG, "CLASS: " + classs);
+                        ArrayList<String> eventDisplayStrings = new ArrayList<>();
+                        ArrayList<String> reminderDisplayStrings = new ArrayList<>();
 
-                            String logString = viewById.getText().toString();
-                            logString = System.getProperty ("line.separator") + Interpreter.classes[classs.intValue()] + "    |     " + dateTime.get(Calendar.HOUR_OF_DAY) + ":" + dateTime.get(Calendar.MINUTE) + ":" + dateTime.get(Calendar.SECOND) + logString;
-                            viewById.setText(logString);
+                        eventList.clear();
+                        reminderList.clear();
+
+                        for (Event event : events) {
+                            eventDisplayStrings.add(event.getTitle() + " | Starts at: "  + event.getStartTime());
+                            eventList.add(event.getTitle() + " | Starts at: " + event.getStartTime());
                         }
-                        catch (Exception e)
-                        {
-                            e.printStackTrace();
-                            Log.d(DEBUG_TAG, e.getMessage());
+
+                        for (HashMap<String, String> reminder : reminders) {
+                            reminderDisplayStrings.add(reminder.get("title") + ": " + reminder.get("content"));
+                            reminderList.add(reminder.get("title") + ": " + reminder.get("content"));
                         }
+
+                        setEventList(eventDisplayStrings);
+                        setReminderList(reminderDisplayStrings);
+
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                updateListViews();
+                            }
+                        });
+
+                        int reminderCount = events.size() + reminders.size();
+
+                        long[] pattern = {0, 400, 100, 100};
+                        Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
+
+                        NotificationCompat.Builder mBuilder =
+                                new NotificationCompat.Builder(MainActivity.this)
+                                        .setSmallIcon(android.R.drawable.ic_menu_my_calendar)
+                                        .setContentTitle("You are approaching work")
+                                        .setContentText("You have " + reminderCount + " reminders")
+                                        .setPriority(PRIORITY_HIGH)
+                                        .setVibrate(pattern)
+                                        .setSound(alarmSound);
+
+                        // Creates an explicit intent for an Activity in your app
+                        Intent resultIntent = new Intent(MainActivity.this, MainActivity.class);
+
+                        resultIntent.putExtra("context", context);
+
+                        // The stack builder object will contain an artificial back stack for the
+                        // started Activity.
+                        // This ensures that navigating backward from the Activity leads out of
+                        // your application to the Home screen.
+                        TaskStackBuilder stackBuilder = TaskStackBuilder.create(MainActivity.this);
+
+                        // Adds the back stack for the Intent (but not the Intent itself)
+                        stackBuilder.addParentStack(MainActivity.class);
+
+                        // Adds the Intent that starts the Activity to the top of the stack
+                        stackBuilder.addNextIntent(resultIntent);
+                        PendingIntent resultPendingIntent =
+                                stackBuilder.getPendingIntent(
+                                        0,
+                                        PendingIntent.FLAG_UPDATE_CURRENT
+                                );
+                        mBuilder.setContentIntent(resultPendingIntent);
+                        NotificationManager mNotificationManager =
+                                (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+
+                        // mId allows you to update the notification later on.
+                        mNotificationManager.notify(1, mBuilder.build());
                     }
-                });
 
                 }
             });
-*/
+
+            aggregator.startMonitoringContext();
+
         } catch (Exception e) {
             Log.d(DEBUG_TAG, e.getMessage());
             e.printStackTrace();
@@ -85,51 +154,70 @@ public class MainActivity extends AppCompatActivity {
     protected void onStart() {
         super.onStart();
     }
+
     @Override
     protected void onPause() {
         super.onPause();
-        Log.d(DEBUG_TAG, "PAUSE");
+    }
 
-        final Handler handler = new Handler();
-        handler.postDelayed(new Runnable() {
-            @Override
-            public void run() {
+    public void setEventList(ArrayList<String> list)
+    {
+        this.eventList = list;
+    }
 
-                long[] pattern = {0, 400, 100, 100};
+    public void setReminderList(ArrayList<String> list)
+    {
+        this.reminderList = list;
+    }
 
-                NotificationCompat.Builder mBuilder =
-                    new NotificationCompat.Builder(MainActivity.this)
-                            .setSmallIcon(android.R.drawable.ic_popup_reminder)
-                            .setContentTitle("My notification")
-                            .setContentText("Hello World!").setVibrate(pattern);
+    public void updateListViews()
+    {
+        reminderAdapter.clear();
+        reminderAdapter.addAll(reminderList);
+        reminderAdapter.notifyDataSetChanged();
 
-                // Creates an explicit intent for an Activity in your app
-                Intent resultIntent = new Intent(MainActivity.this, MainActivity.class);
+        eventAdapter.clear();
+        eventAdapter.addAll(eventList);
+        eventAdapter.notifyDataSetChanged();
+    }
 
-                // The stack builder object will contain an artificial back stack for the
-                // started Activity.
-                // This ensures that navigating backward from the Activity leads out of
-                // your application to the Home screen.
-                TaskStackBuilder stackBuilder = TaskStackBuilder.create(MainActivity.this);
+    @Override
+    protected void onResume() {
+        super.onResume();
 
-                // Adds the back stack for the Intent (but not the Intent itself)
-                stackBuilder.addParentStack(MainActivity.class);
+        Intent intent = getIntent();
+        double context = intent.getDoubleExtra("context", 999.0);
 
-                // Adds the Intent that starts the Activity to the top of the stack
-                stackBuilder.addNextIntent(resultIntent);
-                PendingIntent resultPendingIntent =
-                    stackBuilder.getPendingIntent(
-                        0,
-                        PendingIntent.FLAG_UPDATE_CURRENT
-                    );
-                mBuilder.setContentIntent(resultPendingIntent);
-                NotificationManager mNotificationManager =
-                    (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+        if (context == LocationActivityCalendarAggregator.locationActivityContexts.indexOf(LocationActivityCalendarAggregator.CYCLING_NEAR)
+            || context == LocationActivityCalendarAggregator.locationActivityContexts.indexOf(LocationActivityCalendarAggregator.WALKING_NEAR)) {
 
-                // mId allows you to update the notification later on.
-                mNotificationManager.notify(1, mBuilder.build());
+           getReminders();
+        }
+    }
 
-            }
-        }, 5000);
+    public void getReminders()
+    {
+        List<Event> events = calendar.getEventsWithTagsOfDate(new String[]{"Work"}, "19-12-2016");
+        List<HashMap<String, String>> reminders = database.getReminders("tag", "work"); //tag == work
+
+        ArrayList<String> eventDisplayStrings = new ArrayList<>();
+        ArrayList<String> reminderDisplayStrings = new ArrayList<>();
+
+        eventList.clear();
+        reminderList.clear();
+
+        for (Event event : events) {
+            eventDisplayStrings.add(event.getTitle() + " | Starts at: " + event.getStart().getTime());
+            eventList.add(event.getTitle() + " | Starts at: " + event.getStartTime());
+        }
+
+        for (HashMap<String, String> reminder : reminders) {
+            reminderDisplayStrings.add(reminder.get("title") + ": " + reminder.get("content"));
+            reminderList.add(reminder.get("title") + ": " + reminder.get("content"));
+        }
+
+        setEventList(eventDisplayStrings);
+        setReminderList(reminderDisplayStrings);
+        updateListViews();
     }
 }

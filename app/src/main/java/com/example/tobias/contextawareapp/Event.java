@@ -1,7 +1,5 @@
 package com.example.tobias.contextawareapp;
 
-import android.util.Log;
-
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -16,24 +14,34 @@ import java.util.List;
 public class Event implements Comparable{
 
     final private String DEBUG_TAG = this.getClass().getSimpleName();
+    private final String startTime;
     private String title;
-    private Calendar date;
+    private Calendar start;
+    private Calendar end;
+
     private String[] tags;
 
-    public Event(String title, String[] tags, String date, String time)
+    public Event(String title, String[] tags, String startDate, String startTime, String endDate, String endTime)
     {
         this.title = title;
         this.tags = tags;
 
+        this.startTime = startTime;
+
         try
         {
-            String dateStamp = date+"T"+time;
-            SimpleDateFormat format = new SimpleDateFormat("dd-MM-yyyy'T'HH:mm:ss");
+            String startDateStamp = startDate+"T"+startTime;
+            Date sd = CalendarWidget.dateTimeFirmat.parse(startDateStamp);
 
-            Date d = format.parse(dateStamp);
+            this.start = Calendar.getInstance();
+            this.start.setTime(sd);
 
-            this.date = Calendar.getInstance();
-            this.date.setTime(d);
+            String endSateStamp = endDate+"T"+endTime;
+
+            Date ed = CalendarWidget.dateTimeFirmat.parse(endSateStamp);
+
+            this.end = Calendar.getInstance();
+            this.end.setTime(ed);
         }
         catch (ParseException e)
         {
@@ -41,19 +49,28 @@ public class Event implements Comparable{
         }
     }
 
-    public Calendar getDate()
+    public String getStartTime()
     {
-        return this.date;
+        return this.startTime;
+    }
+
+    public Calendar getStart()
+    {
+        return start;
+    }
+
+    public Calendar getEnd() {
+        return end;
     }
 
     public String[] getTags()
     {
-        return this.tags;
+        return tags;
     }
 
     public String getTitle()
     {
-        return this.title;
+        return title;
     }
 
     public boolean isTaggedWith(String[] tags)
@@ -77,8 +94,8 @@ public class Event implements Comparable{
     {
         Event other = (Event) o;
 
-        Calendar c2 = other.getDate();
-        Calendar c1 = this.getDate();
+        Calendar c2 = other.getStart();
+        Calendar c1 = this.getStart();
 
         return c1.compareTo(c2);
     }

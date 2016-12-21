@@ -1,5 +1,6 @@
 package com.example.tobias.contextawareapp;
 
+import android.app.Activity;
 import android.content.Context;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
@@ -21,7 +22,7 @@ import static android.content.Context.SENSOR_SERVICE;
 
 public class ActivityWidget implements Widget{
 
-    private Context context;
+    private Activity activity;
 
     private SensorManager sensorManager;
     private Sensor accelerometer;
@@ -37,11 +38,11 @@ public class ActivityWidget implements Widget{
     private double gravity = 9.816;
     private List<Double[]> windowResults = new ArrayList<>();
 
-    private OnNewWindowResultListener onNewWindowResultCallback;
+    private NewWindowResultListener onNewWindowResultCallback;
 
-    public ActivityWidget(Context context) {
+    public ActivityWidget(Activity activity) {
 
-        this.context = context;
+        this.activity = activity;
 
         sensorManager = (SensorManager) getContext().getSystemService(SENSOR_SERVICE);
         accelerometer = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
@@ -60,14 +61,14 @@ public class ActivityWidget implements Widget{
                 float sensorY = Math.abs(sensorEvent.values[1]);
                 float sensorZ = Math.abs(sensorEvent.values[2]);
 
-                Log.d(DEBUG_TAG, "ACCELEROMETER CHANGED: X: " + sensorX + " Y: " + sensorY + " Z: " + sensorZ);
+                //Log.d(DEBUG_TAG, "ACCELEROMETER CHANGED: X: " + sensorX + " Y: " + sensorY + " Z: " + sensorZ);
 
                 logData(sensorX, sensorY, sensorZ);
 
                 queueHasReachedSampleSize = (activityLog.size() > windowSampleSize);
 
-                if(queueHasReachedSampleSize)
-                {
+                //if(queueHasReachedSampleSize)
+                //{
                     samplesSinceLastWindow++;
 
                     if(samplesSinceLastWindow > windowSampleSize / 2)
@@ -81,11 +82,13 @@ public class ActivityWidget implements Widget{
                             }
                         }).start();
                     }
-                }
-                else if(activityLog.size() < 2)
-                {
-                    Toast.makeText(getContext().getApplicationContext(), "Filling array with data...", Toast.LENGTH_LONG).show();
-                }
+
+                //Log.d(DEBUG_TAG, "activityLog.size() "+activityLog.size());
+                //}
+                //else if(activityLog.size() < 2)
+                //{
+                //    Toast.makeText(getContext().getApplicationContext(), "Filling array with data...", Toast.LENGTH_LONG).show();
+                //}
             }
 
             @Override
@@ -97,7 +100,7 @@ public class ActivityWidget implements Widget{
     }
 
     private Context getContext(){
-        return context;
+        return activity.getApplicationContext();
     }
 
     private void logData(float x, float y, float z)
@@ -193,7 +196,7 @@ public class ActivityWidget implements Widget{
         return Math.sqrt(variance);
     }
 
-    public void startDataGathering(OnNewWindowResultListener onNewWindowResultCallback) {
+    public void startDataGathering(NewWindowResultListener onNewWindowResultCallback) {
         this.onNewWindowResultCallback = onNewWindowResultCallback;
         this.startDataGathering();
     }

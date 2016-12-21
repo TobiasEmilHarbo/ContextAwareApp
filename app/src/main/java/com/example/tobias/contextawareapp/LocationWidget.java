@@ -39,7 +39,7 @@ public class LocationWidget implements Widget{
     final private LinkedBlockingDeque<Float[]> activityLog = new LinkedBlockingDeque<>(windowSampleSize * 2);
     private List<Double[]> windowResults = new ArrayList<>();
 
-    private OnNewWindowResultListener onNewWindowResultCallback;
+    private NewWindowResultListener onNewWindowResultCallback;
 
     public LocationWidget(Activity activity){
         this.activity = activity;
@@ -68,14 +68,14 @@ public class LocationWidget implements Widget{
             private int samplesSinceLastWindow = 0;
 
             public void onLocationChanged(Location location){
-                Log.d(DEBUG_TAG, "LOCATION CHANGED: Long: " + location.getLongitude() + " Lat: " + location.getLatitude());
+                //Log.d(DEBUG_TAG, "LOCATION CHANGED: Long: " + location.getLongitude() + " Lat: " + location.getLatitude());
 
                 logData( (float)location.getLongitude(),(float)location.getLatitude());
 
                 queueHasReachedSampleSize = (activityLog.size() > windowSampleSize);
 
-                if(queueHasReachedSampleSize)
-                {
+                //if(queueHasReachedSampleSize)
+                //{
                     samplesSinceLastWindow++;
 
                     if(samplesSinceLastWindow > windowSampleSize / 2)
@@ -90,11 +90,13 @@ public class LocationWidget implements Widget{
                             }
                         }).start();
                     }
-                }
-                else if(activityLog.size() < 2)
-                {
-                    Toast.makeText(activity.getApplicationContext(), "Filling array with data...", Toast.LENGTH_LONG).show();
-                }
+
+                //Log.d(DEBUG_TAG, "activityLog.size() "+activityLog.size());
+                //}
+                //else if(activityLog.size() < 2)
+                //{
+                //    Toast.makeText(activity.getApplicationContext(), "Filling array with data...", Toast.LENGTH_LONG).show();
+                //}
             }
 
             public void onStatusChanged(String provider, int status, Bundle extras) {
@@ -113,7 +115,7 @@ public class LocationWidget implements Widget{
         locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 0, 0, locationListener);
     }
 
-    public void startDataGathering(OnNewWindowResultListener onNewWindowResultCallback) {
+    public void startDataGathering(NewWindowResultListener onNewWindowResultCallback) {
         this.onNewWindowResultCallback = onNewWindowResultCallback;
         this.startDataGathering();
     }

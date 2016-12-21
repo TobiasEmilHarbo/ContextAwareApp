@@ -32,7 +32,7 @@ public class WekaTextActivity extends AppCompatActivity {
 
             InputStream model = getAssets().open("J48_walking_cycling_NEW.model");
 
-            Interpreter interpreter = new Interpreter(model);
+            LocationActivityInterpreter interpreter = new LocationActivityInterpreter(model);
             double classification = interpreter.interpret(
                     new String[]{"cycling", "walk"},
                     new String[]{"min", "max"},
