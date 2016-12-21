@@ -99,7 +99,7 @@ public class MainActivity extends AppCompatActivity {
                         int reminderCount = events.size() + reminders.size();
 
                         long[] pattern = {0, 400, 100, 100};
-                        Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALARM);
+                        Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_ALL);
 
                         NotificationCompat.Builder mBuilder =
                                 new NotificationCompat.Builder(MainActivity.this)
@@ -145,7 +145,7 @@ public class MainActivity extends AppCompatActivity {
             aggregator.startMonitoringContext();
 
         } catch (Exception e) {
-            Log.d(DEBUG_TAG, e.getMessage());
+            //Log.d(DEBUG_TAG, e.getMessage());
             e.printStackTrace();
         }
     }

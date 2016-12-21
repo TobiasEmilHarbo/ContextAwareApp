@@ -16,7 +16,7 @@ public class Database {
     {
         reminderTable.add(new HashMap<String, String>() {{
             put("title", "Reminder to self");
-            put("content", "Talk to Jeff about butt holes");
+            put("content", "Talk to Jeff about accounting");
             put("tag", "work");
         }});
     }

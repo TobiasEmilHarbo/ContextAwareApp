@@ -32,7 +32,7 @@ public class LocationActivityCalendarAggregator implements Aggregator {
         add(CYCLING_FAR);
     }};
 
-    int contextLogLength = 1;
+    int contextLogLength = 2;
     final private Deque<Double> locationActivityContextLog = new LinkedBlockingDeque<>(contextLogLength);
 
 
@@ -79,7 +79,6 @@ public class LocationActivityCalendarAggregator implements Aggregator {
 
                     Double currentContext = interpreter.interpret();
 
-
                     while(!locationActivityContextLog.offerFirst(currentContext))
                     {
                         locationActivityContextLog.pollLast();
@@ -105,7 +104,7 @@ public class LocationActivityCalendarAggregator implements Aggregator {
                 }
                 catch (Exception e)
                 {
-                    e.printStackTrace();
+                    //e.printStackTrace();
                     //Log.d(DEBUG_TAG, e.getMessage());
                 }
             }
